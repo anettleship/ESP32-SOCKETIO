@@ -139,11 +139,20 @@ void connectToWifi(String credentials) {
       } else {
         //Last connected network not in the wifiScan, so most likely in a new location
         if (currentStatus == WL_DISCONNECTED) {
-          Serial.println("Removing wifi credentials as the last connected network is not visible");
-          preferences.begin("scads", false);
-          preferences.putString("wifi", "");
-          preferences.end();
-          ESP.restart();
+          Serial.println("Wifi Timeout Reached, Scanning for available SCADS and falling back to captive portal");
+          boolean foundLocalSCADS = scanAndConnectToLocalSCADS();
+          if (!foundLocalSCADS) {
+            //become server
+            currentSetupStatus = setup_server;
+            createSCADSAP();
+            setupCaptivePortal();
+            setupLocalServer();
+          }
+          else {
+            //become client
+            currentSetupStatus = setup_client;
+            setupSocketClientEvents();
+          }
         } else {
           Serial.println("Seem to be having WiFi connection issues, Please try and move closer to you router");
           ESP.restart();

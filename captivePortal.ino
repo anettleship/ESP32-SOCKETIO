@@ -9,7 +9,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
     }
 
     void handleRequest(AsyncWebServerRequest *request) {
-      Serial.print("handleRequest: ");
+      Serial.print("handleRequest v0.5.8: ");
       Serial.println(request->url());
 
       if (!isResetting) {

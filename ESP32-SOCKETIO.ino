@@ -192,7 +192,7 @@ void setup() {
 
   //create 10 digit ID
   myID = generateID();
-  Serial.print("My Yo-Yo ID is:")
+  Serial.print("My Yo-Yo ID is:");
   Serial.println(myID);
 
   SPIFFS.begin();

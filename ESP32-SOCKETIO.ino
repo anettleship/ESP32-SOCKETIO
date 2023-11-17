@@ -93,6 +93,11 @@ unsigned long fadeTimeRGB[NUMPIXELS];
 
 #include "SPIFFS.h"
 
+#include <esp_task_wdt.h>
+// 120 seconds WDT
+#define WDT_TIMEOUT 120
+
+
 //Access Point credentials
 String scads_ssid = "";
 String scads_pass = "blinkblink";
@@ -175,13 +180,20 @@ char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 void setup() {
   setupPixels();
-  Serial.begin(115200);
+  Serial.begin(9600);
   setupPins();
   LONGFADEMINUTESMAX = checkFadingLength();
   setupCapacitiveTouch();
 
+  // setup WDT
+  Serial.println("Configuring WDT...");
+  esp_task_wdt_init(WDT_TIMEOUT, true); //enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
+
   //create 10 digit ID
   myID = generateID();
+  Serial.print("My Yo-Yo ID is:")
+  Serial.println(myID);
 
   SPIFFS.begin();
 
@@ -253,6 +265,9 @@ String getCurrentPairedStatusAsString() {
 }
 
 void loop() {
+  // reset watchdog within timeout to prevent hardware reset
+  esp_task_wdt_reset();
+  Serial.println("Resetting WDT...");
   switch (currentSetupStatus) {
     case setup_pending:
       break;

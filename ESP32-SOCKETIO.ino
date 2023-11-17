@@ -267,7 +267,6 @@ String getCurrentPairedStatusAsString() {
 void loop() {
   // reset watchdog within timeout to prevent hardware reset
   esp_task_wdt_reset();
-  Serial.println("Resetting WDT...");
   switch (currentSetupStatus) {
     case setup_pending:
       break;

@@ -1,3 +1,5 @@
+#include <esp_task_wdt.h>
+
 boolean scanAndConnectToLocalSCADS() {
   boolean foundLocalSCADS = false;
 
@@ -84,6 +86,9 @@ void connectToWifi(String credentials) {
 
   while (!connectSuccess) {
 
+    // reset watchdog timer to tell it that we 
+    // have no hung while searching for wifi
+    esp_task_wdt_reset();
     uint8_t currentStatus = wifiMulti.run();
 
     //#ifdef DEV

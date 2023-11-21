@@ -94,8 +94,8 @@ unsigned long fadeTimeRGB[NUMPIXELS];
 #include "SPIFFS.h"
 
 #include <esp_task_wdt.h>
-// 120 seconds WDT
-#define WDT_TIMEOUT 120
+// 300 seconds WDT, longer than wifi timeout
+#define WDT_TIMEOUT 300
 
 
 //Access Point credentials

@@ -186,6 +186,7 @@ void setup() {
   SPIFFS.begin();
 
   preferences.begin("scads", false);
+  //preferences.putString("wifi", "");
   wifiCredentials = preferences.getString("wifi", "");
   macCredentials = preferences.getString("mac", "");
   preferences.end();

@@ -198,6 +198,8 @@ void setup() {
   SPIFFS.begin();
 
   preferences.begin("scads", false);
+  // RESET WIFI for testing
+  // preferences.putString("wifi", "");
   wifiCredentials = preferences.getString("wifi", "");
   macCredentials = preferences.getString("mac", "");
   preferences.end();

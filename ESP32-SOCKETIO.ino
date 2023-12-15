@@ -199,7 +199,7 @@ void setup() {
 
   preferences.begin("scads", false);
   // RESET WIFI for testing
-  // preferences.putString("wifi", "");
+  preferences.putString("wifi", "");
   wifiCredentials = preferences.getString("wifi", "");
   macCredentials = preferences.getString("mac", "");
   preferences.end();

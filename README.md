@@ -6,8 +6,11 @@
 Firmware for Yo-Yo Machines.
 
 ## How to use
-Please use the Yo-Yo Firmware Uploader to upload the latest firmware onto your device.
-Alternatively, clone this repository and use with the Arduino IDE.
+This is a fork of the main project, attempting to fix a bug where the light touch machine removes its own wifi credentials and resets, in environments where wifi signal is poor.
+In order to make these changes it was necessary to build the project from source using modern dependencies, which was less than easy several years after the project was last developed.
+Pending addition to this readme, the procedure to build from source is described here: https://github.com/interactionresearchstudio/ESP32-SOCKETIO/issues/63
+It requires Arduino IDE v1.x and a specfic version of esp32 core to build successfully. A compiled bin of the current version is included for those who can work out what to do with it.
+It's probably easier than building your own from source!
 
 ## Issues
 Please report issues on here with as much information as possible, including relevant

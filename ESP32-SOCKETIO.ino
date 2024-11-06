@@ -36,7 +36,8 @@ int currentSetupStatus = setup_pending;
 #define PROJECT_SLUG "ESP32-SOCKETIO"
 #define VERSION "v0.2"
 #define ESP32set
-#define WIFICONNECTTIMEOUT 240000
+
+#define WIFICONNECTTIMEOUT 30000
 #define SSID_MAX_LENGTH 31
 
 #include <AsyncTCP.h>
@@ -92,6 +93,11 @@ unsigned long fadeTimeRGB[NUMPIXELS];
 #define RGBFADEMILLIS 6
 
 #include "SPIFFS.h"
+
+#include <esp_task_wdt.h>
+// 300 seconds WDT, longer than wifi timeout
+#define WDT_TIMEOUT 300
+
 
 //Access Point credentials
 String scads_ssid = "";
@@ -180,13 +186,21 @@ void setup() {
   LONGFADEMINUTESMAX = checkFadingLength();
   setupCapacitiveTouch();
 
+  // setup WDT
+  Serial.println("Configuring WDT...");
+  esp_task_wdt_init(WDT_TIMEOUT, true); //enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
+
   //create 10 digit ID
   myID = generateID();
+  Serial.print("My Yo-Yo ID is:");
+  Serial.println(myID);
 
   SPIFFS.begin();
 
   preferences.begin("scads", false);
-  //preferences.putString("wifi", "");
+  // RESET WIFI for testing
+  // preferences.putString("wifi", "");
   wifiCredentials = preferences.getString("wifi", "");
   macCredentials = preferences.getString("mac", "");
   preferences.end();
@@ -254,6 +268,8 @@ String getCurrentPairedStatusAsString() {
 }
 
 void loop() {
+  // reset watchdog within timeout to prevent hardware reset
+  esp_task_wdt_reset();
   switch (currentSetupStatus) {
     case setup_pending:
       break;

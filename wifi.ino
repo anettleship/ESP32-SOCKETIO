@@ -1,3 +1,5 @@
+#include <esp_task_wdt.h>
+
 boolean scanAndConnectToLocalSCADS() {
   boolean foundLocalSCADS = false;
 
@@ -80,10 +82,15 @@ void connectToWifi(String credentials) {
   Serial.println("Connecting to Router");
 
   long wifiMillis = millis();
+  long captivePortalMillis = millis();
+  char remainingTime[40];
   bool connectSuccess = false;
 
   while (!connectSuccess) {
 
+    // reset watchdog timer to tell it that we 
+    // have not hung while searching for wifi
+    esp_task_wdt_reset();
     uint8_t currentStatus = wifiMulti.run();
 
     //#ifdef DEV
@@ -132,17 +139,16 @@ void connectToWifi(String credentials) {
         preferences.putString("wifi", "");
         preferences.end();
         ESP.restart();
-      } else if (lastConnectedInNetworkList()) {
-        //Last connected network in the wifi scan, so is potentially network interference or dropped signal
-        Serial.println("Retrying network connect as last connected network is visible. Please try and move closer to your router");
-        ESP.restart();
       } else {
         //Last connected network not in the wifiScan, so most likely in a new location
         if (currentStatus == WL_DISCONNECTED) {
           Serial.println("Wifi Timeout Reached, Scanning for available SCADS and falling back to captive portal");
           boolean foundLocalSCADS = scanAndConnectToLocalSCADS();
+          // set captive portal timeout counter
+          captivePortalMillis = millis(); 
           if (!foundLocalSCADS) {
             //become server
+            Serial.println("Becoming server...");
             currentSetupStatus = setup_server;
             createSCADSAP();
             setupCaptivePortal();
@@ -150,11 +156,25 @@ void connectToWifi(String credentials) {
           }
           else {
             //become client
+            Serial.println("Becoming client...");
             currentSetupStatus = setup_client;
             setupSocketClientEvents();
           }
         } else {
-          Serial.println("Seem to be having WiFi connection issues, Please try and move closer to you router");
+          // if we were disconnected long enough to trigger the captive portal, pause here to give the user time to change wifi credentials 
+          while(millis() - captivePortalMillis < WIFICONNECTTIMEOUT * 8){
+            sprintf(remainingTime,"Seconds: %lu", ((WIFICONNECTTIMEOUT * 8) - (millis() - captivePortalMillis)) / 1000);
+            Serial.println("Pausing to allow access to captive portal, will reboot after:");
+            Serial.println(remainingTime);
+            // force reset from captive portal
+            if(isResetting == true) {
+              Serial.println("Reset message detected from captive portal, rebooting now to apply new credentials in 5 seconds...");
+              delay(5000);
+              ESP.restart();
+            }
+            delay(3000);
+          } 
+          Serial.println("Timeout reached, rebooting to try connection again, you may need to move closer to your router");
           ESP.restart();
         }
       }

@@ -139,10 +139,6 @@ void connectToWifi(String credentials) {
         preferences.putString("wifi", "");
         preferences.end();
         ESP.restart();
-      } else if (lastConnectedInNetworkList()) {
-        //Last connected network in the wifi scan, so is potentially network interference or dropped signal
-        Serial.println("Retrying network connect as last connected network is visible. Please try and move closer to your router");
-        ESP.restart();
       } else {
         //Last connected network not in the wifiScan, so most likely in a new location
         if (currentStatus == WL_DISCONNECTED) {

@@ -36,7 +36,8 @@ int currentSetupStatus = setup_pending;
 #define PROJECT_SLUG "ESP32-SOCKETIO"
 #define VERSION "v0.2"
 #define ESP32set
-#define WIFICONNECTTIMEOUT 240000
+// changed this from 240000 temporarily!!!
+#define WIFICONNECTTIMEOUT 30000
 #define SSID_MAX_LENGTH 31
 
 #include <AsyncTCP.h>

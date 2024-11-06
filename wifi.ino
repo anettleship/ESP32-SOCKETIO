@@ -82,6 +82,8 @@ void connectToWifi(String credentials) {
   Serial.println("Connecting to Router");
 
   long wifiMillis = millis();
+  long captivePortalMillis = millis();
+  char remainingTime[40];
   bool connectSuccess = false;
 
   while (!connectSuccess) {
@@ -146,8 +148,11 @@ void connectToWifi(String credentials) {
         if (currentStatus == WL_DISCONNECTED) {
           Serial.println("Wifi Timeout Reached, Scanning for available SCADS and falling back to captive portal");
           boolean foundLocalSCADS = scanAndConnectToLocalSCADS();
+          // set captive portal timeout counter
+          captivePortalMillis = millis(); 
           if (!foundLocalSCADS) {
             //become server
+            Serial.println("Becoming server...");
             currentSetupStatus = setup_server;
             createSCADSAP();
             setupCaptivePortal();
@@ -155,11 +160,19 @@ void connectToWifi(String credentials) {
           }
           else {
             //become client
+            Serial.println("Becoming client...");
             currentSetupStatus = setup_client;
             setupSocketClientEvents();
           }
         } else {
-          Serial.println("Seem to be having WiFi connection issues, Please try and move closer to you router");
+          // if we were disconnected long enough to trigger the captive portal, start another wifi connected timeout and then reboot.
+          while(millis() - captivePortalMillis < WIFICONNECTTIMEOUT * 4){
+            sprintf(remainingTime,"Seconds: %lu", ((WIFICONNECTTIMEOUT * 4) - (millis() - captivePortalMillis)) / 1000);
+            Serial.println("Pausing to allow access to captive portal, will reboot after:");
+            Serial.println(remainingTime);
+            delay(3000);
+          } 
+          Serial.println("Timeout reached, rebooting to try connection again, you may need to move closer to your router");
           ESP.restart();
         }
       }

@@ -89,7 +89,7 @@ void connectToWifi(String credentials) {
   while (!connectSuccess) {
 
     // reset watchdog timer to tell it that we 
-    // have no hung while searching for wifi
+    // have not hung while searching for wifi
     esp_task_wdt_reset();
     uint8_t currentStatus = wifiMulti.run();
 
@@ -165,11 +165,17 @@ void connectToWifi(String credentials) {
             setupSocketClientEvents();
           }
         } else {
-          // if we were disconnected long enough to trigger the captive portal, start another wifi connected timeout and then reboot.
-          while(millis() - captivePortalMillis < WIFICONNECTTIMEOUT * 4){
-            sprintf(remainingTime,"Seconds: %lu", ((WIFICONNECTTIMEOUT * 4) - (millis() - captivePortalMillis)) / 1000);
+          // if we were disconnected long enough to trigger the captive portal, pause here to give the user time to change wifi credentials 
+          while(millis() - captivePortalMillis < WIFICONNECTTIMEOUT * 8){
+            sprintf(remainingTime,"Seconds: %lu", ((WIFICONNECTTIMEOUT * 8) - (millis() - captivePortalMillis)) / 1000);
             Serial.println("Pausing to allow access to captive portal, will reboot after:");
             Serial.println(remainingTime);
+            // force reset from captive portal
+            if(isResetting == true) {
+              Serial.println("Reset message detected from captive portal, rebooting now to apply new credentials in 5 seconds...");
+              delay(5000);
+              ESP.restart();
+            }
             delay(3000);
           } 
           Serial.println("Timeout reached, rebooting to try connection again, you may need to move closer to your router");

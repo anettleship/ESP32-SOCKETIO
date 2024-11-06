@@ -57,7 +57,9 @@ class CaptiveRequestHandler : public AsyncWebHandler {
               StaticJsonDocument<256> rebootJsonDoc;
               if (!deserializeJson(rebootJsonDoc, json)) {
                 int delayMs = rebootJsonDoc["delay"];
-
+                char delayString[40];
+                sprintf(delayString,"Delay before reboot: %u",delayMs);
+                Serial.println(delayString);
                 softReset(delayMs);
                 socket_server.textAll("RESTART");
               }

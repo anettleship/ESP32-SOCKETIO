@@ -180,7 +180,7 @@ char path[] = "/socket.io/?transport=websocket"; // Socket.IO Base Path
 
 void setup() {
   setupPixels();
-  Serial.begin(9600);
+  Serial.begin(115200);
   setupPins();
   LONGFADEMINUTESMAX = checkFadingLength();
   setupCapacitiveTouch();
